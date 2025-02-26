@@ -1,0 +1,359 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  DEVELOPER
+  SUPPORTER
+  BETA
+  USER
+}
+
+model Device {
+  id          String   @id @default(uuid()) @map("_id")
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  userAgent   String
+  ipAddress   String
+  fingerprint String?
+  lastOnline  DateTime @default(now())
+}
+
+model RegisterKey {
+  id        String   @id @default(uuid()) @map("_id")
+  key       String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id                 String              @id @default(uuid()) @map("_id")
+  email              String              @unique
+  passwordHash       String?
+  ip                 String
+  createdAt          DateTime            @default(now())
+  lastLogin          DateTime?
+  firstLogin         DateTime?
+  role               UserRole            @default(USER)
+  isTwoFactorEnabled Boolean             @default(false)
+  twoFactorSecret    String?
+  isBanned           Boolean             @default(false)
+  isVerified         Boolean             @default(false)
+  username           String              @unique
+  nickname           String?
+  avatar             String?
+  bio                String?
+  urls               String[]
+  referralCode       String              @unique
+  referredBy         String?             @db.String
+  referrals          Referral[]          @relation("ReferrerRelation")
+  referredUsers      Referral[]          @relation("ReferredUserRelation")
+  RegisterKeys       RegisterKeys[]
+  SsoToken           SsoToken[]
+  Device             Device[]
+  PasswordResetCode  PasswordResetCode[]
+  CalendarEvent      CalendarEvent[]
+  Task               Task[]
+  gradeCollections   GradeCollection[]
+  friendRequests     Friendship[]        @relation("FriendshipRequest")
+  friendReceives     Friendship[]        @relation("FriendshipReceive")
+  VocabFolder        VocabFolder[]
+  Flashcard          Flashcard[]
+  Timetable          Timetable[]
+  Exam               Exam[]
+  StudySession       StudySession[]
+  Goal               Goal[]
+  Note               Note[]
+  SchoolProject      SchoolProject[]
+  AbsenceRecord      AbsenceRecord[]
+  UserSettings       UserSettings?
+}
+
+model UserSettings {
+  id                 String   @id @default(uuid()) @map("_id")
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id])
+  emailNotifications Boolean  @default(true)
+  marketingEmails    Boolean  @default(false)
+  securityEmails     Boolean  @default(true)
+  appNotifications   Boolean  @default(true)
+  darkMode           Boolean  @default(false)
+  language           String   @default("en")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model PasswordResetCode {
+  code      String   @id @map("_id")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+}
+
+model RegisterKeys {
+  id        String   @id @default(uuid()) @map("_id")
+  key       String   @unique
+  ip        String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model SsoToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Referral {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  referrerId     String   @db.String
+  referredUserId String   @db.String
+  createdAt      DateTime @default(now())
+  referrer       User     @relation("ReferrerRelation", fields: [referrerId], references: [id])
+  referredUser   User     @relation("ReferredUserRelation", fields: [referredUserId], references: [id])
+}
+
+model CalendarEvent {
+  id           String    @id @default(uuid()) @map("_id")
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
+  title        String
+  description  String?
+  startTime    DateTime
+  endTime      DateTime
+  location     String?
+  reminder     Boolean   @default(false)
+  reminderTime DateTime?
+  color        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Task {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  dueDate   DateTime
+  notes     String?
+  color     String?
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum GradeType {
+  SCHULAUFGABE
+  EXAMEN
+  MUENDLICH
+  REFERAT
+}
+
+enum Subject {
+  MATHE
+  DEUTSCH
+  ENGLISCH
+  FRANZOESISCH
+  LATEIN
+  GESCHICHTE
+  GEOGRAPHIE
+  BIOLOGIE
+  CHEMIE
+  PHYSIK
+  INFORMATIK
+  SPORT
+  RELIGION
+  ETHIK
+  KUNST
+  MUSIK
+  WIRTSCHAFT
+  POLITIK
+  SOZIALKUNDE
+  PHILOSOPHIE
+  PSYCHOLOGIE
+  PRAKTIKUM
+  SONSTIGES
+}
+
+model GradeCollection {
+  id         String   @id @default(uuid()) @map("_id")
+  userId     String
+  schoolYear String
+  data       Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, schoolYear])
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Friendship {
+  id          String           @id @default(uuid()) @map("_id")
+  requesterId String
+  receiverId  String
+  status      FriendshipStatus
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  requester   User             @relation("FriendshipRequest", fields: [requesterId], references: [id])
+  receiver    User             @relation("FriendshipReceive", fields: [receiverId], references: [id])
+}
+
+model VocabFolder {
+  id         String      @id @default(uuid()) @map("_id")
+  userId     String
+  name       String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  flashcards Flashcard[]
+  user       User        @relation(fields: [userId], references: [id])
+}
+
+model Flashcard {
+  id         String      @id @default(uuid()) @map("_id")
+  folderId   String
+  userId     String
+  front      String
+  back       String
+  repetition Int         @default(0)
+  interval   Int         @default(1)
+  easeFactor Float       @default(2.5)
+  lastReview DateTime?
+  nextReview DateTime    @default(now())
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  folder     VocabFolder @relation(fields: [folderId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+}
+
+model Timetable {
+  id          String   @id @default(uuid()) @map("_id")
+  userId      String
+  monday      Json
+  tuesday     Json
+  wednesday   Json
+  thursday    Json
+  friday      Json
+  teacherList Json
+  roomList    Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Exam {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String
+  subject   String
+  examType  String
+  examDate  DateTime
+  startTime DateTime
+  endTime   DateTime
+  location  String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model StudySession {
+  id        String    @id @default(uuid()) @map("_id")
+  userId    String
+  subject   String
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int?
+  notes     String?
+  mood      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Goal {
+  id          String    @id @default(uuid()) @map("_id")
+  userId      String
+  title       String
+  description String?
+  targetDate  DateTime?
+  progress    Float     @default(0.0)
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Note {
+  id        String   @id @default(uuid()) @map("_id")
+  userId    String
+  subject   String
+  title     String
+  content   String
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+enum ProjectStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum ProjectPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model SchoolProject {
+  id          String          @id @default(uuid()) @map("_id")
+  userId      String
+  title       String
+  description String?
+  deadline    DateTime?
+  status      ProjectStatus   @default(PENDING)
+  priority    ProjectPriority @default(MEDIUM)
+  tasks       Json?
+  progress    Float           @default(0.0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id])
+}
+
+enum AbsenceType {
+  SICKNESS
+  UNEXCUSED
+  OTHER
+}
+
+model AbsenceRecord {
+  id          String      @id @default(uuid()) @map("_id")
+  userId      String
+  date        DateTime
+  type        AbsenceType
+  hours       Float?
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id])
+}
