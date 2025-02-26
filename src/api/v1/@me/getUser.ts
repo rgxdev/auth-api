@@ -1,3 +1,5 @@
+// src/api/v1/@me/getUser.ts
+
 import {Router} from 'express';
 import {Container} from 'inversify';
 import {AuthService} from "@/services/AuthService";

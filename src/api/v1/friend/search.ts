@@ -1,4 +1,4 @@
-// routes/friendsSearch.ts
+// src/api/v1/friend/search.ts
 import {Request, Response, Router} from 'express'
 import rateLimit from 'express-rate-limit'
 import {FriendService} from '@/services/FriendService'

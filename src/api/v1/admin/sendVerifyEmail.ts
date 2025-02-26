@@ -1,3 +1,5 @@
+// src/api/v1/admin/sendVerifyEmail.ts
+
 import {Router} from 'express';
 import getWelcomeEmail from "@/mails/welcomeEmail";
 import {sendMail} from "@/utils/mailer";

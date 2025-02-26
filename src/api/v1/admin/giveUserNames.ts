@@ -1,3 +1,5 @@
+// src/api/v1/admin/giveUserNames.ts
+
 import {Router} from 'express'
 import {logger} from "@/lib/logger"
 import prisma from "@/lib/prismaClient"

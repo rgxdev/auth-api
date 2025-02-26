@@ -1,3 +1,5 @@
+// src/api/v1/stats/getLastUserRegister.ts
+
 import {Request, Response, Router} from 'express';
 import {StatsService} from '@/services/StatsService';
 import {logger} from '@/lib/logger';

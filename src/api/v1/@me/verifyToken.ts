@@ -1,3 +1,5 @@
+// src/api/v1/@me/verifyToken.ts
+
 import {Request, Response, Router} from 'express';
 import {AuthService} from "@/services/AuthService";
 
