@@ -26,13 +26,6 @@ model Device {
   lastOnline  DateTime @default(now())
 }
 
-model RegisterKey {
-  id        String   @id @default(uuid()) @map("_id")
-  key       String   @unique
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
 model User {
   id                 String              @id @default(uuid()) @map("_id")
   email              String              @unique
@@ -59,20 +52,8 @@ model User {
   SsoToken           SsoToken[]
   Device             Device[]
   PasswordResetCode  PasswordResetCode[]
-  CalendarEvent      CalendarEvent[]
-  Task               Task[]
-  gradeCollections   GradeCollection[]
   friendRequests     Friendship[]        @relation("FriendshipRequest")
   friendReceives     Friendship[]        @relation("FriendshipReceive")
-  VocabFolder        VocabFolder[]
-  Flashcard          Flashcard[]
-  Timetable          Timetable[]
-  Exam               Exam[]
-  StudySession       StudySession[]
-  Goal               Goal[]
-  Note               Note[]
-  SchoolProject      SchoolProject[]
-  AbsenceRecord      AbsenceRecord[]
   UserSettings       UserSettings?
 }
 
@@ -125,80 +106,6 @@ model Referral {
   referredUser   User     @relation("ReferredUserRelation", fields: [referredUserId], references: [id])
 }
 
-model CalendarEvent {
-  id           String    @id @default(uuid()) @map("_id")
-  userId       String
-  user         User      @relation(fields: [userId], references: [id])
-  title        String
-  description  String?
-  startTime    DateTime
-  endTime      DateTime
-  location     String?
-  reminder     Boolean   @default(false)
-  reminderTime DateTime?
-  color        String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-}
-
-model Task {
-  id        String   @id @default(uuid()) @map("_id")
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  name      String
-  dueDate   DateTime
-  notes     String?
-  color     String?
-  completed Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum GradeType {
-  SCHULAUFGABE
-  EXAMEN
-  MUENDLICH
-  REFERAT
-}
-
-enum Subject {
-  MATHE
-  DEUTSCH
-  ENGLISCH
-  FRANZOESISCH
-  LATEIN
-  GESCHICHTE
-  GEOGRAPHIE
-  BIOLOGIE
-  CHEMIE
-  PHYSIK
-  INFORMATIK
-  SPORT
-  RELIGION
-  ETHIK
-  KUNST
-  MUSIK
-  WIRTSCHAFT
-  POLITIK
-  SOZIALKUNDE
-  PHILOSOPHIE
-  PSYCHOLOGIE
-  PRAKTIKUM
-  SONSTIGES
-}
-
-model GradeCollection {
-  id         String   @id @default(uuid()) @map("_id")
-  userId     String
-  schoolYear String
-  data       Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id])
-
-  @@unique([userId, schoolYear])
-}
-
 enum FriendshipStatus {
   PENDING
   ACCEPTED
@@ -214,146 +121,4 @@ model Friendship {
   updatedAt   DateTime         @updatedAt
   requester   User             @relation("FriendshipRequest", fields: [requesterId], references: [id])
   receiver    User             @relation("FriendshipReceive", fields: [receiverId], references: [id])
-}
-
-model VocabFolder {
-  id         String      @id @default(uuid()) @map("_id")
-  userId     String
-  name       String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  flashcards Flashcard[]
-  user       User        @relation(fields: [userId], references: [id])
-}
-
-model Flashcard {
-  id         String      @id @default(uuid()) @map("_id")
-  folderId   String
-  userId     String
-  front      String
-  back       String
-  repetition Int         @default(0)
-  interval   Int         @default(1)
-  easeFactor Float       @default(2.5)
-  lastReview DateTime?
-  nextReview DateTime    @default(now())
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  folder     VocabFolder @relation(fields: [folderId], references: [id])
-  user       User        @relation(fields: [userId], references: [id])
-}
-
-model Timetable {
-  id          String   @id @default(uuid()) @map("_id")
-  userId      String
-  monday      Json
-  tuesday     Json
-  wednesday   Json
-  thursday    Json
-  friday      Json
-  teacherList Json
-  roomList    Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-}
-
-model Exam {
-  id        String   @id @default(uuid()) @map("_id")
-  userId    String
-  subject   String
-  examType  String
-  examDate  DateTime
-  startTime DateTime
-  endTime   DateTime
-  location  String?
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-model StudySession {
-  id        String    @id @default(uuid()) @map("_id")
-  userId    String
-  subject   String
-  startTime DateTime
-  endTime   DateTime?
-  duration  Int?
-  notes     String?
-  mood      String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id])
-}
-
-model Goal {
-  id          String    @id @default(uuid()) @map("_id")
-  userId      String
-  title       String
-  description String?
-  targetDate  DateTime?
-  progress    Float     @default(0.0)
-  completed   Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id])
-}
-
-model Note {
-  id        String   @id @default(uuid()) @map("_id")
-  userId    String
-  subject   String
-  title     String
-  content   String
-  tags      String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-}
-
-enum ProjectStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELED
-}
-
-enum ProjectPriority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-model SchoolProject {
-  id          String          @id @default(uuid()) @map("_id")
-  userId      String
-  title       String
-  description String?
-  deadline    DateTime?
-  status      ProjectStatus   @default(PENDING)
-  priority    ProjectPriority @default(MEDIUM)
-  tasks       Json?
-  progress    Float           @default(0.0)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  user        User            @relation(fields: [userId], references: [id])
-}
-
-enum AbsenceType {
-  SICKNESS
-  UNEXCUSED
-  OTHER
-}
-
-model AbsenceRecord {
-  id          String      @id @default(uuid()) @map("_id")
-  userId      String
-  date        DateTime
-  type        AbsenceType
-  hours       Float?
-  description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  user        User        @relation(fields: [userId], references: [id])
 }
