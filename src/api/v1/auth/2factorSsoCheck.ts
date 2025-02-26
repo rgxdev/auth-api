@@ -42,6 +42,7 @@ export default (router: Router) => {
                 expiresIn: '30d',
                 algorithm: 'HS256',
             });
+            logger.info('2FA_VERIFY', `2FA verification successful for: ${user.id}`);
 
             return res.status(200).json({
                 type: 'success',

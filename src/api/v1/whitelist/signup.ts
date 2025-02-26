@@ -79,9 +79,11 @@ export default async (router: Router) => {
                 logger.error('MAILER', `Failed to send verification email: ${email}`)
             }
 
+            logger.info("WHITELIST", 'Whitelist account created from: ' + email);
+
             return res.status(200).send({type: 'success', message: 'Email added to whitelist successfully'})
         } catch (e: any) {
-            console.log(e)
+            logger.error('WHITELIST', `Failed to add email to whitelist: ${e.message}`)
             return res.status(500).send({type: 'api_error', message: 'Failed to add email to whitelist'})
         }
     })

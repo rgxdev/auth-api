@@ -84,6 +84,8 @@ export default (router: Router) => {
                 logger.error('MAILER', `Failed to send verification email: ${email}`)
             }
 
+            logger.info("REGISTER", 'Account created successfully: ' + email)
+
             return res.status(200).send({type: 'success', message: 'Email added to whitelist successfully'})
         } catch (e: any) {
             console.error(e)

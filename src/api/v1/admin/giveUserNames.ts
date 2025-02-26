@@ -28,6 +28,7 @@ export default (router: Router) => {
                     data: {username: randomUsername}
                 })
             }
+            logger.info('SYSTEM', `Usernames updated successfully`)
             return res.status(200).json({
                 type: 'success',
                 message: 'Usernames updated successfully',

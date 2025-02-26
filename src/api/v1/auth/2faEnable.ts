@@ -33,6 +33,8 @@ export default (router: Router) => {
                 data: {twoFactorSecret},
             });
 
+            logger.info('2FA_ENABLE', `2FA enabled for: ${user.id}`);
+
             return res.status(200).json({
                 type: 'success',
                 message: 'Scan the QR code with your authenticator app.',

@@ -1,6 +1,7 @@
 import {Request, Response, Router} from 'express'
 import prisma from '@/lib/prismaClient'
 import {AuthService} from '@/services/AuthService'
+import {logger} from "@/lib/logger";
 
 const adminRouter = Router()
 const authService = new AuthService()
@@ -38,8 +39,10 @@ adminRouter.get('/user/:userId', async (req: Request, res: Response) => {
             return res.status(404).json({type: 'not_found', message: 'User not found'})
         }
         res.json({type: 'success', user})
+        logger.info('User fetched by an admin:', user.id)
     } catch (error: any) {
         res.status(500).json({type: 'api_error', message: 'Internal server error'})
+        logger.error('Error fetching user by an admin:', error)
     }
 })
 
@@ -65,8 +68,10 @@ adminRouter.put('/user/:userId', async (req: Request, res: Response) => {
             }
         })
         res.json({type: 'success', user: updatedUser})
+        logger.info('User updated:', updatedUser.id)
     } catch (error: any) {
         res.status(500).json({type: 'api_error', message: 'Internal server error'})
+        logger.error('Error updating user:', error)
     }
 })
 
@@ -79,8 +84,10 @@ adminRouter.delete('/user/:userId', async (req: Request, res: Response) => {
         }
         await prisma.user.delete({where: {id: userId}})
         res.json({type: 'success', message: 'User deleted successfully'})
+        logger.info('User deleted by admin:', user.id)
     } catch (error: any) {
         res.status(500).json({type: 'api_error', message: 'Internal server error'})
+        logger.error('Error deleting user:', error)
     }
 })
 

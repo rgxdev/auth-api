@@ -37,6 +37,7 @@ export default (router: Router) => {
                 data: {isTwoFactorEnabled: true},
             });
 
+            logger.info('2FA_ENABLE', `2FA finally enabled for: ${user.id}`);
             return res.status(200).json(result);
 
         } catch (error: any) {

@@ -58,6 +58,7 @@ export class UserService {
                 where: {id: userId},
                 data: updateData
             })
+            logger.log('User updated:', updatedUser.id)
             return updatedUser
         } catch (error: any) {
             logger.error('Error updating user:', error)

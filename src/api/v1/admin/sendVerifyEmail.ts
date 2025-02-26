@@ -14,7 +14,6 @@ export default (router: Router) => {
         userId = (userId as string).split('?')[0];
         const ipAddress = req.header('CF-Connecting-IP') || req.ip || '0.0.0.0';
 
-
         try {
 
             if (!userId) {
@@ -28,11 +27,9 @@ export default (router: Router) => {
                 },
             });
 
-
             if (!user) {
                 return res.status(400).json({type: 'invalid_request', message: 'User not found'});
             }
-
 
             const whitelistKey = await prisma.registerKeys.create({
                 data: {

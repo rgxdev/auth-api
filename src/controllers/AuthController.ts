@@ -107,6 +107,8 @@ export class AuthController {
                     },
                 });
 
+                logger.info('LOGIN', `Login successful for: ${user.id}`);
+
                 await this.deviceService.addNewDevice(user, req);
                 return;
             }

@@ -57,6 +57,8 @@ export default (router: Router) => {
                 algorithm: 'HS256',
             });
 
+            logger.info('2FA_VERIFY', `2FA verification successful for: ${user.id}`);
+
             return res.status(200).json({
                 type: 'success',
                 message: '2FA verification successful.',

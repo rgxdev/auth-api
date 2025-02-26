@@ -29,8 +29,11 @@ export default (router: Router) => {
                 data: {isVerified: true},
             });
 
+            logger.info("WHITELIST", 'Whitelist account verified for: ' + tokenRecord.user.id);
+
             return res.status(200).send({type: 'invalid_request', message: 'Email verified successfully'});
         } catch {
+            logger.error('WHITELIST', `Failed to verify email`);
             return res.status(500).send({type: 'api_error', message: 'Failed to verify email'});
         }
     });

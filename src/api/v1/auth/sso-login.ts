@@ -40,6 +40,8 @@ export default (router: Router) => {
 
             await prisma.ssoToken.delete({where: {id: ssoTokenRecord.id}});
 
+            logger.info('SSO_LOGIN', `User logged in via SSO: ${user.id}`);
+
             return res.status(200).json({type: 'success', message: 'Logged in successfully', token: jwtToken});
         } catch (error: any) {
             logger.error('SSO_LOGIN', `Error during SSO login: ${error}`);
