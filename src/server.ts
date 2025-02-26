@@ -33,13 +33,6 @@ app.use(cookieParser());
 app.use(expressUseragent.express());
 
 const allowedOrigins = [
-    'https://auth.schulsync.com',
-    'https://schulsync.com',
-    'https://dash.schulsync.com',
-    'http://localhost:3000',
-    'https://api.schulsync.com',
-    'http://192.168.101.59:3000',
-    'capacitor://localhost',
     'http://localhost',
     'https://localhost',
 
