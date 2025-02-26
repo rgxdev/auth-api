@@ -1,0 +1,1291 @@
+swagger: "2.0"
+info:
+  title: "My API"
+  description: >
+    English documentation for all API endpoints.
+    This API supports user profile management, administrative operations,
+    authentication (including password reset and 2FA), friend management,
+    statistics, and whitelist operations.
+  version: "1.0.0"
+host: "api.example.com"
+basePath: "/"
+schemes:
+  - "https"
+produces:
+  - "application/json"
+securityDefinitions:
+  bearer:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    description: "Enter your bearer token in the format 'Bearer <token>'."
+tags:
+  - name: "Me"
+    description: "User profile and settings endpoints"
+  - name: "Admin"
+    description: "Administrative endpoints"
+  - name: "Auth"
+    description: "Authentication and password management endpoints"
+  - name: "Friend"
+    description: "Friendship management endpoints"
+  - name: "Stats"
+    description: "Statistics endpoints"
+  - name: "Whitelist"
+    description: "Whitelist registration endpoints"
+  - name: "General"
+    description: "General endpoints (home, version, etc.)"
+paths:
+  /me/devices:
+    get:
+      tags:
+        - "Me"
+      summary: "Retrieve devices for the authenticated user"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "A list of devices."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Device"
+          examples:
+            application/json: |
+              [
+                {
+                  "deviceId": "device123",
+                  "deviceName": "Chrome Browser",
+                  "lastUsed": "2025-02-26T12:00:00Z"
+                }
+              ]
+  /me/get-referred-count:
+    get:
+      tags:
+        - "Me"
+      summary: "Get referral count"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "Referral count response."
+          schema:
+            type: "object"
+            properties:
+              count:
+                type: "integer"
+          examples:
+            application/json: |
+              { "count": 5 }
+  /me:
+    get:
+      tags:
+        - "Me"
+      summary: "Get user details"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "User details retrieved successfully."
+          schema:
+            $ref: "#/definitions/User"
+          examples:
+            application/json: |
+              {
+                "id": "user123",
+                "email": "user@example.com",
+                "username": "johndoe",
+                "nickname": "John",
+                "avatar": "https://example.com/avatar.jpg",
+                "bio": "Sample bio",
+                "role": "user",
+                "isTwoFactorEnabled": false,
+                "createdAt": "2025-02-26T12:00:00Z"
+              }
+    put:
+      tags:
+        - "Me"
+      summary: "Update user profile"
+      security:
+        - bearer: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "User profile update data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              nickname:
+                type: "string"
+              bio:
+                type: "string"
+            example:
+              nickname: "Johnny"
+              bio: "Updated bio"
+      responses:
+        "200":
+          description: "User updated successfully."
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+              updatedSettings:
+                type: "object"
+          examples:
+            application/json: |
+              {
+                "message": "User updated successfully",
+                "updatedSettings": {
+                  "nickname": "Johnny",
+                  "bio": "Updated bio"
+                }
+              }
+  /me/settings:
+    get:
+      tags:
+        - "Me"
+      summary: "Get user settings"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "User settings retrieved successfully."
+          schema:
+            type: "object"
+          examples:
+            application/json: |
+              {
+                "theme": "dark",
+                "notifications": true
+              }
+    put:
+      tags:
+        - "Me"
+      summary: "Update user settings"
+      security:
+        - bearer: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Settings update data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              theme:
+                type: "string"
+              notifications:
+                type: "boolean"
+            example:
+              theme: "light"
+              notifications: false
+      responses:
+        "200":
+          description: "User settings updated successfully."
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+              updatedSettings:
+                type: "object"
+          examples:
+            application/json: |
+              {
+                "message": "User settings updated successfully",
+                "updatedSettings": {
+                  "theme": "light",
+                  "notifications": false
+                }
+              }
+  /me/verify:
+    get:
+      tags:
+        - "Me"
+      summary: "Verify authentication token"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "Token verified successfully."
+          examples:
+            application/json: |
+              { "message": "Token is valid" }
+  /admin/users:
+    get:
+      tags:
+        - "Admin"
+      summary: "Retrieve list of users"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "List of users retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              users:
+                type: "array"
+                items:
+                  $ref: "#/definitions/UserSummary"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "users": [
+                  {
+                    "id": "user123",
+                    "email": "user@example.com",
+                    "role": "user",
+                    "username": "johndoe",
+                    "nickname": "John",
+                    "createdAt": "2025-02-26T12:00:00Z"
+                  }
+                ]
+              }
+  /admin/user/{userId}:
+    get:
+      tags:
+        - "Admin"
+      summary: "Get user information by ID"
+      security:
+        - bearer: []
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          type: "string"
+          description: "ID of the user"
+      responses:
+        "200":
+          description: "User information retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              user:
+                $ref: "#/definitions/UserDetail"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "user": {
+                  "id": "user123",
+                  "email": "user@example.com",
+                  "username": "johndoe",
+                  "nickname": "John",
+                  "createdAt": "2025-02-26T12:00:00Z"
+                }
+              }
+    put:
+      tags:
+        - "Admin"
+      summary: "Update user information"
+      security:
+        - bearer: []
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          type: "string"
+          description: "ID of the user"
+        - in: "body"
+          name: "body"
+          description: "User update data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              role:
+                type: "string"
+              isBanned:
+                type: "boolean"
+              isVerified:
+                type: "boolean"
+              username:
+                type: "string"
+              nickname:
+                type: "string"
+              email:
+                type: "string"
+              avatar:
+                type: "string"
+              bio:
+                type: "string"
+            example:
+              role: "admin"
+              isBanned: false
+              isVerified: true
+              username: "john_updated"
+              nickname: "John"
+              email: "john@example.com"
+              avatar: "https://example.com/avatar.jpg"
+              bio: "Updated bio"
+      responses:
+        "200":
+          description: "User updated successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              user:
+                $ref: "#/definitions/UserDetail"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "user": {
+                  "id": "user123",
+                  "email": "john@example.com",
+                  "username": "john_updated",
+                  "nickname": "John",
+                  "createdAt": "2025-02-26T12:00:00Z"
+                }
+              }
+    delete:
+      tags:
+        - "Admin"
+      summary: "Delete a user"
+      security:
+        - bearer: []
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          type: "string"
+          description: "ID of the user to delete"
+      responses:
+        "200":
+          description: "User deleted successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "User deleted successfully"
+              }
+  /admin/assign-usernames:
+    post:
+      tags:
+        - "Admin"
+      summary: "Assign usernames"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "Usernames updated successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              updatedCount:
+                type: "integer"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Usernames updated successfully",
+                "updatedCount": 3
+              }
+  /admin/resend-verify:
+    post:
+      tags:
+        - "Admin"
+      summary: "Resend verification email"
+      security:
+        - bearer: []
+      parameters:
+        - name: "userId"
+          in: "query"
+          required: true
+          type: "string"
+          description: "ID of the user to resend verification email"
+      responses:
+        "200":
+          description: "Verification email sent successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Verification email sent successfully"
+              }
+  /request-password-reset:
+    post:
+      tags:
+        - "Auth"
+      summary: "Request password reset"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Password reset request data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+            example:
+              email: "user@example.com"
+      responses:
+        "200":
+          description: "Password reset request processed."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "If an account with that email exists, a password reset email has been sent."
+              }
+  /set-password:
+    post:
+      tags:
+        - "Auth"
+      summary: "Set new password"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "New password data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+              newPassword:
+                type: "string"
+              confirmPassword:
+                type: "string"
+            example:
+              code: "resetcode123"
+              newPassword: "newStrongPassword1!"
+              confirmPassword: "newStrongPassword1!"
+      responses:
+        "200":
+          description: "Password changed successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Password changed successfully."
+              }
+  /update-password:
+    post:
+      tags:
+        - "Auth"
+      summary: "Update current password"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Password update data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              oldPassword:
+                type: "string"
+              password:
+                type: "string"
+              password_confirm:
+                type: "string"
+            example:
+              oldPassword: "oldPass123!"
+              password: "newPass123!"
+              password_confirm: "newPass123!"
+      responses:
+        "200":
+          description: "Password updated successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Password updated successfully."
+              }
+  /verify-password-reset-code:
+    post:
+      tags:
+        - "Auth"
+      summary: "Verify password reset code"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Password reset code data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              code:
+                type: "string"
+            example:
+              code: "resetcode123"
+      responses:
+        "200":
+          description: "Password reset code verified successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Code verified. You can now set a new password."
+              }
+  /verify-2fa:
+    post:
+      tags:
+        - "Auth"
+      summary: "Verify two-factor authentication code"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "2FA verification data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+              password:
+                type: "string"
+              twoFactorCode:
+                type: "string"
+            example:
+              email: "user@example.com"
+              password: "userPassword!"
+              twoFactorCode: "123456"
+      responses:
+        "200":
+          description: "2FA verification successful."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              token:
+                type: "string"
+              user:
+                $ref: "#/definitions/UserSummary"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "2FA verification successful.",
+                "token": "jwt-token-here",
+                "user": {
+                  "id": "user123",
+                  "email": "user@example.com",
+                  "username": "johndoe",
+                  "nickname": "John",
+                  "role": "user"
+                }
+              }
+  /verify-2fa-enable:
+    post:
+      tags:
+        - "Auth"
+      summary: "Verify two-factor code for enabling 2FA"
+      security:
+        - bearer: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "2FA code data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              twoFactorCode:
+                type: "string"
+            example:
+              twoFactorCode: "123456"
+      responses:
+        "200":
+          description: "2FA verified successfully for enabling."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "2FA verification successful."
+              }
+  /verify-sso-2fa:
+    post:
+      tags:
+        - "Auth"
+      summary: "Verify two-factor authentication for SSO"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "SSO 2FA verification data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+              twoFactorCode:
+                type: "string"
+            example:
+              email: "user@example.com"
+              twoFactorCode: "123456"
+      responses:
+        "200":
+          description: "SSO 2FA verification successful."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              token:
+                type: "string"
+              user:
+                $ref: "#/definitions/UserSummary"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "2FA verification successful.",
+                "token": "jwt-token-here",
+                "user": {
+                  "id": "user123",
+                  "email": "user@example.com",
+                  "username": "johndoe",
+                  "nickname": "John",
+                  "role": "user"
+                }
+              }
+  /enable-2fa:
+    post:
+      tags:
+        - "Auth"
+      summary: "Enable two-factor authentication"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "2FA enabled successfully, QR code generated."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              qrCodeImageUrl:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Scan the QR code with your authenticator app.",
+                "qrCodeImageUrl": "data:image/png;base64,..."
+              }
+  /register:
+    post:
+      tags:
+        - "Auth"
+      summary: "Register a new user"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Registration data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+              password:
+                type: "string"
+            example:
+              email: "newuser@example.com"
+              password: "SecurePass123!"
+      responses:
+        "200":
+          description: "Registration successful; verification email sent."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Email added to whitelist successfully"
+              }
+  /login:
+    post:
+      tags:
+        - "Auth"
+      summary: "Login user"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Login credentials"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+              password:
+                type: "string"
+            example:
+              email: "user@example.com"
+              password: "userPassword!"
+      responses:
+        "200":
+          description: "Login successful or 2FA required."
+          schema:
+            type: "object"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Login successful.",
+                "token": "jwt-token-here",
+                "user": {
+                  "id": "user123",
+                  "email": "user@example.com",
+                  "username": "johndoe",
+                  "nickname": "John",
+                  "role": "user"
+                }
+              }
+  /sso-login:
+    get:
+      tags:
+        - "Auth"
+      summary: "SSO Login"
+      parameters:
+        - name: "token"
+          in: "query"
+          required: true
+          type: "string"
+          description: "SSO token"
+      responses:
+        "200":
+          description: "SSO login successful."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              token:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Logged in successfully",
+                "token": "jwt-token-here"
+              }
+  /friend/accept:
+    post:
+      tags:
+        - "Friend"
+      summary: "Accept a friend request"
+      security:
+        - bearer: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Friend request acceptance data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              friendshipId:
+                type: "string"
+            example:
+              friendshipId: "friendship123"
+      responses:
+        "200":
+          description: "Friend request accepted."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              request:
+                type: "object"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Friend request accepted",
+                "request": { "id": "friendship123", "status": "accepted" }
+              }
+  /friend/decline:
+    post:
+      tags:
+        - "Friend"
+      summary: "Decline a friend request"
+      security:
+        - bearer: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Friend request decline data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              friendshipId:
+                type: "string"
+            example:
+              friendshipId: "friendship123"
+      responses:
+        "200":
+          description: "Friend request declined."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              request:
+                type: "object"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Friend request declined",
+                "request": { "id": "friendship123", "status": "declined" }
+              }
+  /friend:
+    get:
+      tags:
+        - "Friend"
+      summary: "Get friend list"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "List of friends retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              friends:
+                type: "array"
+                items:
+                  $ref: "#/definitions/UserSummary"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "friends": [
+                  { "id": "friend1", "username": "friendA" },
+                  { "id": "friend2", "username": "friendB" }
+                ]
+              }
+  /friend/pending:
+    get:
+      tags:
+        - "Friend"
+      summary: "Get pending friend requests"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "Pending friend requests retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              pending:
+                type: "array"
+                items:
+                  type: "object"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "pending": [
+                  { "id": "req1", "from": "user123" }
+                ]
+              }
+  /friend/remove/{friendId}:
+    delete:
+      tags:
+        - "Friend"
+      summary: "Remove a friend"
+      security:
+        - bearer: []
+      parameters:
+        - name: "friendId"
+          in: "path"
+          required: true
+          type: "string"
+          description: "ID of the friend to remove"
+      responses:
+        "200":
+          description: "Friend removed successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Friend removed successfully"
+              }
+  /friend/sent:
+    get:
+      tags:
+        - "Friend"
+      summary: "Get sent friend requests"
+      security:
+        - bearer: []
+      responses:
+        "200":
+          description: "Sent friend requests retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              sent:
+                type: "array"
+                items:
+                  type: "object"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "sent": [
+                  { "id": "req1", "to": "user456" }
+                ]
+              }
+  /friend/search:
+    get:
+      tags:
+        - "Friend"
+      summary: "Search for friends"
+      security:
+        - bearer: []
+      parameters:
+        - name: "q"
+          in: "query"
+          required: true
+          type: "string"
+          description: "Search query"
+      responses:
+        "200":
+          description: "Search results for friends."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              results:
+                type: "array"
+                items:
+                  $ref: "#/definitions/UserSummary"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "results": [
+                  { "id": "user123", "username": "johndoe" }
+                ]
+              }
+  /friend/request:
+    post:
+      tags:
+        - "Friend"
+      summary: "Send a friend request"
+      security:
+        - bearer: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Friend request data"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              friendId:
+                type: "string"
+            example:
+              friendId: "user456"
+      responses:
+        "201":
+          description: "Friend request sent."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+              request:
+                type: "object"
+          examples:
+            application/json: |
+              {
+                "type": "success",
+                "message": "Friend request sent",
+                "request": { "id": "req123", "status": "pending" }
+              }
+  /get-last-user-register:
+    get:
+      tags:
+        - "Stats"
+      summary: "Get last user registration date"
+      responses:
+        "200":
+          description: "Last user registration date retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              date:
+                type: "string"
+                format: "date-time"
+          examples:
+            application/json: |
+              { "date": "2025-02-25T15:00:00Z" }
+  /get-registered-users:
+    get:
+      tags:
+        - "Stats"
+      summary: "Get total number of registered users"
+      responses:
+        "200":
+          description: "Registered users count retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              count:
+                type: "integer"
+          examples:
+            application/json: |
+              { "count": 1500 }
+  /whitelist/signup:
+    get:
+      tags:
+        - "Whitelist"
+      summary: "Signup for whitelist"
+      parameters:
+        - name: "email"
+          in: "query"
+          required: true
+          type: "string"
+          description: "Email address for signup"
+      responses:
+        "200":
+          description: "Whitelist signup successful."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              { "type": "success", "message": "Email added to whitelist successfully" }
+  /whitelist/verify:
+    post:
+      tags:
+        - "Whitelist"
+      summary: "Verify whitelist signup"
+      parameters:
+        - name: "key"
+          in: "query"
+          required: true
+          type: "string"
+          description: "Verification key"
+      responses:
+        "200":
+          description: "Whitelist verification successful."
+          schema:
+            type: "object"
+            properties:
+              type:
+                type: "string"
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              { "type": "success", "message": "Email verified successfully" }
+  /version:
+    get:
+      tags:
+        - "General"
+      summary: "Get API version"
+      responses:
+        "200":
+          description: "API version retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              version:
+                type: "string"
+          examples:
+            application/json: |
+              { "version": "1.0.0" }
+  /:
+    get:
+      tags:
+        - "General"
+      summary: "Home endpoint with a motivational message"
+      responses:
+        "200":
+          description: "Motivational message retrieved successfully."
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
+          examples:
+            application/json: |
+              { "message": "Believe in yourself!" }
+definitions:
+  Device:
+    type: "object"
+    properties:
+      deviceId:
+        type: "string"
+      deviceName:
+        type: "string"
+      lastUsed:
+        type: "string"
+        format: "date-time"
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      email:
+        type: "string"
+      username:
+        type: "string"
+      nickname:
+        type: "string"
+      avatar:
+        type: "string"
+      bio:
+        type: "string"
+      role:
+        type: "string"
+      isTwoFactorEnabled:
+        type: "boolean"
+      createdAt:
+        type: "string"
+        format: "date-time"
+  UserSummary:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+      email:
+        type: "string"
+      username:
+        type: "string"
+      nickname:
+        type: "string"
+      role:
+        type: "string"
+  UserDetail:
+    allOf:
+      - $ref: "#/definitions/User"
+      - type: "object"
+        properties:
+          Device:
+            type: "array"
+            items:
+              $ref: "#/definitions/Device"
+          RegisterKeys:
+            type: "array"
+            items:
+              type: "object"
+          referrals:
+            type: "array"
+            items:
+              type: "object"
+          referredUsers:
+            type: "array"
+            items:
+              type: "object"
+          PasswordResetCode:
+            type: "object"
+          friendRequests:
+            type: "array"
+            items:
+              type: "object"
+          friendReceives:
+            type: "array"
+            items:
+              type: "object"
+          UserSettings:
+            type: "object"
