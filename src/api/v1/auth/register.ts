@@ -1,3 +1,5 @@
+// src/api/v1/auth/register.ts
+
 import {Request, Response, Router} from 'express'
 import prisma from "@/lib/prismaClient"
 import {AuthService} from "@/services/AuthService"

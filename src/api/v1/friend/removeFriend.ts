@@ -1,3 +1,5 @@
+// src/api/v1/friend/removeFriend.ts
+
 import {Request, Response, Router} from 'express'
 import rateLimit from 'express-rate-limit'
 import {AuthService} from '@/services/AuthService'

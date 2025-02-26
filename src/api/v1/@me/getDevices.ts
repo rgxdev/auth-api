@@ -1,3 +1,5 @@
+// src/routes/v1/@me/getDevices.ts
+
 import {Request, Response, Router} from 'express';
 import {AuthService} from "@/services/AuthService";
 import {DeviceService} from "@/services/DeviceService";

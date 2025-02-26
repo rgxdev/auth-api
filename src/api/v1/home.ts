@@ -1,3 +1,5 @@
+// src/api/v1/home.ts
+
 import {Router} from "express";
 
 const motivationalSentences = [

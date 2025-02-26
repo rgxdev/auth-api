@@ -1,3 +1,5 @@
+// src/api/v1/whitelist/signup.ts
+
 import {Router} from 'express'
 import prisma from "@/lib/prismaClient"
 import {sendMail} from "@/utils/mailer"
